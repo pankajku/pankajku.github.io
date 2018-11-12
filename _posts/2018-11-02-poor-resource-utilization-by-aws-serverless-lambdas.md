@@ -4,7 +4,7 @@ title: "Poor Resource Utilization by AWS Serverless Lambdas And How It Impacts Y
 date: 2018-11-02
 ---
 
-A quick note on the title -- although it refers to only AWS Serverless Lambdas, simply because it is the 800-lb gorilla among serverless infrastructure vendors with broadest adoption among developers, as we will see most of the qualitative observations hold for other cloud function vendors as well. My attempts to make it more agnostic mostly resulted in incomprensible titles, so I begrudgingly settled on this click-baity one.
+A quick note on the title -- although it refers to only AWS Serverless Lambdas, simply because it is the 800-lb gorilla among serverless infrastructure vendors with broadest adoption among developers, as we will see most of the qualitative observations hold for other cloud function vendors as well. My attempts to make it more agnostic mostly resulted in incomprehensible titles, so I begrudgingly settled on this click-baity one.
 
 There is a lot going for [serverless architectures](#serverless-architectures) with application backend written as a collection of simple functions and deployed to the data centers operated by AWS, Google Cloud, Microsoft Azure or any number of such cloud vendors. These functions execute in response to various kinds of events: arrival of an HTTP request, presence of a message in a queue or topic, expiration of a timer, change in a data entity, whatever. The application developer writes these functions, packages them as per Cloud operator's instructions or more likely using the Serverless Framework and then runs a command to deploy. The key benefit of this architecture is freedom from managing servers, even VMs, and typical worries of deployment such as capacity planning, scaling, self-healing and so on.
 
@@ -168,19 +168,39 @@ Large number of active runtime instances are also problematic for functions that
 
 ## What About Other Clouds
 
+Here is the output from Google Cloud Function:
+
 <pre class="screen">
-61fbd455-4438-44d3-a1d7-ab285b7580fa,1,10000000,49999995000000,Hello World,3432
-d6cd58ff-5a71-453a-8070-6908cc843fb4,1,10000000,49999995000000,Hello World,4088
-802ceade-47dd-4be7-b2b6-dbe6dbb89668,1,10000000,49999995000000,Hello World,4195
-e9ffba27-3b2e-4012-8475-a8c5aad09b4e,1,10000000,49999995000000,Hello World,4621
-61fbd455-4438-44d3-a1d7-ab285b7580fa,2,10000000,49999995000000,Hello World,6342
-d6cd58ff-5a71-453a-8070-6908cc843fb4,2,10000000,49999995000000,Hello World,7328
-3238e492-ccde-4051-8b22-2f4bc3e0f9c7,1,10000000,49999995000000,Hello World,7843
-e9ffba27-3b2e-4012-8475-a8c5aad09b4e,2,10000000,49999995000000,Hello World,7850
-802ceade-47dd-4be7-b2b6-dbe6dbb89668,2,10000000,49999995000000,Hello World,7851
-61fbd455-4438-44d3-a1d7-ab285b7580fa,3,10000000,49999995000000,Hello World,8922
+61fbd455-4438-44d3-a1d7-ab285b7580fa,1,...,...,...,3432
+d6cd58ff-5a71-453a-8070-6908cc843fb4,1,...,...,...,4088
+802ceade-47dd-4be7-b2b6-dbe6dbb89668,1,...,...,...,4195
+e9ffba27-3b2e-4012-8475-a8c5aad09b4e,1,...,...,...,4621
+61fbd455-4438-44d3-a1d7-ab285b7580fa,2,...,...,...,6342
+d6cd58ff-5a71-453a-8070-6908cc843fb4,2,...,...,...,7328
+3238e492-ccde-4051-8b22-2f4bc3e0f9c7,1,...,...,...,7843
+e9ffba27-3b2e-4012-8475-a8c5aad09b4e,2,...,...,...,7850
+802ceade-47dd-4be7-b2b6-dbe6dbb89668,2,...,...,...,7851
+61fbd455-4438-44d3-a1d7-ab285b7580fa,3,...,...,...,8922
 </pre>
 
+As is evident, Google Cloud activated five runtime instances, three of them executed the function twice and one thrice. The second invocations took more than 7000 milliseconds. The third one took almost 9000 ms. Clearly, there are no concurrent executions in a single runtime instance.
+
+I also deployed a similar function to Azure. The corresponding output is:
+
+<pre class="screen">
+f85ba4c0-1250-4929-bb44-b561afa123b4,1,...,...,...,3800
+f85ba4c0-1250-4929-bb44-b561afa123b4,2,...,...,...,4096
+f85ba4c0-1250-4929-bb44-b561afa123b4,3,...,...,...,4343
+f85ba4c0-1250-4929-bb44-b561afa123b4,4,...,...,...,4560
+f85ba4c0-1250-4929-bb44-b561afa123b4,5,...,...,...,4766
+f85ba4c0-1250-4929-bb44-b561afa123b4,6,...,...,...,4951
+f85ba4c0-1250-4929-bb44-b561afa123b4,7,...,...,...,5154
+2fb04f62-feda-48d9-b503-d7f3b375b904,1,...,...,...,8107
+1e67eebc-aa04-4d3e-ab1c-8608fbeb4893,1,...,...,...,9393
+cfc95039-e915-4c96-aa59-15a3119b65e4,1,...,...,...,10320
+</pre>
+
+First seven invocations are within the same runtime instance and are most likely running _concurrently_. Last three are in different runtime instances.
 
 ## So What Is My Point
 
