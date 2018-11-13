@@ -223,9 +223,11 @@ cfc95039-e915-4c96-aa59-15a3119b65e4,1,...,...,...,10320
 
 ## So What Is My Point
 
-The main argument of this post may give the impression that I view Serverless as a flawed architecture which is better avoided for production deployments. Not at all. Serverless presents an elegant programming model and highly scalable and manageable deployment environment for a large category of backend programs and range of load conditions. My belief is that the current programming model and implementations of the deployment infrastructure are in early stages of development and we developers should be aware of these limitations to make the right architectural choices based on expected throughput and latency expectations.
+The title and main argument of this post may give the impression that I view Serverless as a flawed architecture better to be avoided for production deployments. Not at all. Serverless presents an elegant programming model and highly scalable and manageable deployment environment for a large category of backend programs and range of load conditions. My belief is that the current programming model and implementations of the deployment infrastructure are in early stages of development. We developers should be aware of these limitations to make the right architectural choices based on expected throughput and latency expectations.
 
 Longer term my hope is that the infrastructure vendors would fine tune their implementations to optimize latency, throughput and resource utilization either automatically or by giving more control knobs to sysadmins and make serverless architecture suitable for even more demanding applications.
+
+Another thing that is sorely needed is a more concrete specification of cloud function programming and execution model, especially when it comes to concurrent executions within a single process. Ideally, vendors would collaborate so that the same cloud functions can be deployed to any of the compliant clouds.
 
 References
 ----------
