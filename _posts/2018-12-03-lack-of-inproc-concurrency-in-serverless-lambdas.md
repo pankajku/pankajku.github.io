@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "In-Process Concurrency in Serverless Functions And How It Impacts Your Applications"
-date: 2018-11-13
+title: "Lack of In-Process Concurrency in Serverless Functions And How It Impacts You Application"
+date: 2018-12-03
 ---
 
 *The report from Web UI performance group was not good: a handful of pages were taking significantly longer to load, over ten times more than the normal 300 to 500ms. The only thing different for these pages was that they were making a number of requests to populate different parts of the page. However, the requests were concurrent and the backend was architected to be highly scalable*
